@@ -1,0 +1,96 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.3'
+	id 'io.spring.dependency-management' version '1.1.4'	
+	id "org.openapi.generator" version "6.5.0"
+	id "com.diffplug.eclipse.apt" version "3.26.0"
+}
+
+group = 'com.sindorim.demo'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	all {
+		exclude group: 'ch.qos.logback', module: 'logback-classic'
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+//	1. 기본 의존성 정보
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.3'
+	
+//	2. springdoc-openapi 적용 정보 (Swagger 적용을 위한 정보)
+	//	boot version 3.0.6 버젼
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+
+//	3. openapi generator 적용을 위한 정보
+	//	boot version 3.0.6 버젼
+	implementation 'org.openapitools:openapi-generator:6.5.0'
+	implementation "org.openapitools:openapi-generator-gradle-plugin:6.5.0"
+
+	implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+	implementation 'javax.validation:validation-api:2.0.1.Final'
+	implementation 'javax.annotation:javax.annotation-api:1.3.2'
+	implementation 'javax.servlet:javax.servlet-api:4.0.1'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
+	
+}
+
+/*
+tasks.named('test') {
+	useJUnitPlatform()
+}
+*/
+
+openApiGenerate {
+	// true일 경우 로그 확인 가능
+	verbose.set(true)
+	// spring 전용 코드를 생성하라는 것. Generator가 어떤 코드를 생성할지 지정하는 값.
+	generatorName.set("spring")
+	// Spring Generator 내부에 spring-boot 라이브러리를 이용하여 생성하라는 것.
+	library.set("spring-boot")
+	// 생성할 openapi manifest의 위치. 로컬 파일 혹은 웹으로도 가능
+	inputSpec.set(project.file("$rootDir/src/main/resources/petstore.yaml").absolutePath)
+	// 생성될 파일이 위치할 경로
+    outputDir.set(project.file("$buildDir/generated-sources").absolutePath)
+    // 생성되는 REST API의 패키지 경로
+	apiPackage.set("com.sindorim.demo.openapi.rest")
+	// 생성되는 모델 REST API로 들어오는 데이터 객체, 출력 객체가 생성될 위치
+	modelPackage.set("com.sindorim.demo.openapi.domain")
+	configOptions.set(
+			[
+					interfaceOnly: "true",
+					useBeanValidation: "true",
+					performBeanValidation: "true",
+					serializableModel: "true",
+					sourceFolder: "/java",
+					implFolder: "/java",
+			]
+	)
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java', 'build/generated-sources/java']			
+		}
+	}
+}
+
+compileJava.dependsOn.tasks.openApiGenerate
