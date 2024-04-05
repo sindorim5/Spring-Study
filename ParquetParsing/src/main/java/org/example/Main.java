@@ -14,7 +14,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException {
 
-        String filePath = "C:\\Users\\kihun\\Desktop\\cities.parquet";
+        String filePath = "./cities.parquet";
 
         // Open the Parquet file as an AvroParquetReader
         InputFile inputFile = HadoopInputFile.fromPath(new Path(filePath), new Configuration());
@@ -26,17 +26,21 @@ public class Main {
         GenericRecord record;
         while ((record = parquetReader.read()) != null) {
             // Skip the Avro schema by directly accessing the record's fields
-            String continent = record.get("continent").toString();
-            String countryJson = record.get("country").toString();
+            String continentString = record.get("continent").toString();
+            String countryString = record.get("country").toString();
 
-            Country country = objectMapper.readValue(countryJson, Country.class);
+            Country country = objectMapper.readValue(countryString, Country.class);
             Cities cities = new Cities();
-            cities.continent = continent;
+            cities.continent = continentString;
             cities.country = country;
 
             System.out.println(cities);
         }
 
         parquetReader.close();
+
+        // ParquetToJson parquetToJson = new ParquetToJson(filePath);
+        // parquetToJson.convertToJson();
+
     }
 }
