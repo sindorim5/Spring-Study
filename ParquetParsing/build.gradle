@@ -19,18 +19,11 @@ dependencies {
     implementation 'org.apache.parquet:parquet-avro:1.13.1'
     implementation 'org.apache.hadoop:hadoop-common:3.3.6'
     implementation 'org.apache.hadoop:hadoop-mapreduce-client-core:3.3.6'
-    implementation 'org.apache.parquet:parquet-jackson:1.13.1'
-    implementation 'org.apache.parquet:parquet-tools:1.11.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
 }
 
 configurations {
     all*.exclude group: 'org.slf4j', module: 'slf4j-reload4j'
-}
-
-task run(type: JavaExec) {
-    main = mainClassName
-    classpath = sourceSets.main.runtimeClasspath
 }
 
 test {
